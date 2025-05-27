@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Map - Local Fishing Guide</title>
+    <link rel="stylesheet" href="../css/common.css">
+    <link rel="stylesheet" href="../css/map.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="w">
+            <div class="logo">Welcome to Melbourne's Freshwater</div>
+            <ul class="nav-links">
+                <li><a href="../index.html">Home</a></li>
+                <li class="login-btn"><a href="map.html">Map</a></li>
+                <li><a href="bait.html">Bait</a></li>
+                <li><a href="Species and regulations.html">Species and regulations</a></li>
+                <li><a href="about.html">About</a></li>
+            </ul>
+        </div>
+    </nav>
+
+
+    <div class="map-container">
+        
+        <!-- 10个定位点（无地名，仅圆点，去除内联定位） -->
+        <div class="map-marker" data-index="0"></div>
+        <div class="map-marker" data-index="1"></div>
+        <div class="map-marker" data-index="2"></div>
+        <div class="map-marker" data-index="3"></div>
+        <div class="map-marker" data-index="4"></div>
+        <div class="map-marker" data-index="5"></div>
+        <div class="map-marker" data-index="6"></div>
+        <div class="map-marker" data-index="7"></div>
+        <div class="map-marker" data-index="8"></div>
+        <div class="map-marker" data-index="9"></div>
+		<div style="color: red; user-select:none; position: absolute;font-size: 30px;
+        top: 80px; /* 或者使用top, left, right等属性 */
+        left: 50px;  /* 根据需要调整位置 */
+        padding: 5px 10px;
+        border-radius: 5px;">*</div>
+        <!-- 弹窗 -->
+        <div class="popup" id="popup">
+            <div class="popup-content">
+                <span class="popup-close" id="popupClose">&times;</span>
+                <div class="popup-arrow"></div>
+                <div id="popupTitle"></div>
+                <div id="popupSpecies"></div>
+                <div id="popupWeather"></div>
+                <a id="popupMore" href="#" class="popup-more" target="_blank">Click for more</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 地点数据
+        const locations = [
+            {
+                name: 'Yarra river',
+                species: 'Estuary perch, Murray cod',
+                weather: 'Rain, The northwest wind shifts to southwest, at 11 to 18 km per hour',
+                link: 'map1.html'
+            },
+            {
+                name: 'Albert park lake',
+                species: 'Rainbow trout, Golden Perch',
+                weather: 'Rain, The northwest wind shifts to southwest, at 11 to 18 km per hour',
+                link: 'map2.html'
+            },
+            {
+                name: 'Caulfield racecourse lake',
+                species: 'Rainbow trout, Golden Perch',
+                weather: 'Rain, The northwest wind shifts to southwest, at 16 to 24 km per hour',
+                link: 'map3.html'
+            },
+            {
+                name: 'Karkarook lake',
+                species: 'Rainbow trout, Golden Perch',
+                weather: 'Rain, The northwest wind shifts to southwest, at 21 to 34 km per hour',
+                link: 'map4.html'
+            },
+            {
+                name: 'Lilydale lake',
+                species: 'Rainbow trout, Common carp',
+                weather: 'Rain, The northwest wind shifts to southwest, at 6 to 19 km per hour',
+                link: 'map5.html'
+            },
+            {
+                name: 'Yarrambat casting pool',
+                species: 'Rainbow trout, Redfin',
+                weather: 'Rain, The northwest wind shifts to southwest, at 14 to 23 km per hour',
+                link: 'map6.html'
+            },
+            {
+                name: 'Sugarloaf reservior',
+                species: 'Golden perch, Redfin',
+                weather: 'Rain, The northwest wind shifts to southwest, at 6 to 18 km per hour',
+                link: 'map7.html'
+            },
+            {
+                name: 'Devilbend reservoir',
+                species: 'Rainbow trout, Estuary perch',
+                weather: 'Rain, The northwest wind shifts to southwest, at 16 to 27 km per hour',
+                link: 'map8.html'
+            },
+            {
+                name: 'Berwick spring',
+                species: 'Rainbow trout, Redfin, Common carp',
+                weather: 'Rain, The northwest wind shifts to southwest, at 11 to 19 km per hour',
+                link: 'map9.html'
+            },
+            {
+                name: 'Ferntree gully quarry',
+                species: 'Rainbow trout, Australian bass',
+                weather: 'Rain, The northwest wind shifts to southwest, at 11 to 19 km per hour',
+                link: 'map10.html'
+            }
+        ];
+        const popup = document.getElementById('popup');
+        const popupContent = popup.querySelector('.popup-content');
+        document.querySelectorAll('.map-marker').forEach(marker => {
+            marker.addEventListener('click', function (e) {
+                const idx = this.getAttribute('data-index');
+                const loc = locations[idx];
+                document.getElementById('popupTitle').textContent = loc.name;
+                document.getElementById('popupSpecies').textContent = 'Popular species: ' + loc.species;
+                document.getElementById('popupWeather').textContent = 'Weather conditions: ' + loc.weather;
+                document.getElementById('popupMore').href = loc.link;
+                // 定位弹窗到marker下方
+                const markerRect = this.getBoundingClientRect();
+                const containerRect = document.querySelector('.map-container').getBoundingClientRect();
+                // 计算弹窗left/top
+                const scrollTop = window.scrollY || document.documentElement.scrollTop;
+                const scrollLeft = window.scrollX || document.documentElement.scrollLeft;
+                let popupLeft = markerRect.left + markerRect.width / 2 - 40 + scrollLeft-containerRect.left; // 140为弹窗宽度一半
+                let popupTop = markerRect.bottom + 12 + scrollTop; // 12px间距
+                // 防止超出右侧
+                if (popupLeft + 280 > window.innerWidth) popupLeft = window.innerWidth - 300;
+                if (popupLeft < 10) popupLeft = 10;
+                // 防止超出下方
+                if (popupTop + 180 > window.innerHeight + scrollTop) popupTop = markerRect.top - 180 + scrollTop;
+                popup.style.left = popupLeft + 'px';
+                popup.style.top = popupTop + 'px';
+                popup.style.display = 'block';
+				popup.style.position = 'absolute';
+            });
+        });
+        document.getElementById('popupClose').onclick = function () {
+            popup.style.display = 'none';
+        };
+        // 点击弹窗外关闭
+        document.addEventListener('mousedown', function (event) {
+            if (popup.style.display === 'block' && !popupContent.contains(event.target) && !event.target.classList.contains('map-marker')) {
+                popup.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+
+</html>
